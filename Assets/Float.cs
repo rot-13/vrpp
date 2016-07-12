@@ -5,10 +5,16 @@ using UnityEngine.Networking;
 public class Float : NetworkBehaviour {
 	public float amplitude;          //Set in Inspector 
 	public float speed;                  //Set in Inspector 
+	public Material tempMat;
+	public GameObject mesher;
 	private float tempVal;
 	private Vector3 tempPos;
+
 	void Start () 
 	{
+		if (Network.isClient) {
+			mesher.GetComponent<Renderer>().sharedMaterial = tempMat;
+		}
 		if (!isLocalPlayer) {
 			return;
 		}

@@ -303,6 +303,7 @@ public class OVRPlayerController : MonoBehaviour
 #if !UNITY_ANDROID || UNITY_EDITOR
 		if (!SkipMouseRotation)
 			euler.y += Input.GetAxis("Mouse X") * rotateInfluence * 3.25f;
+			euler.x += Input.GetAxis("Mouse Y") * rotateInfluence * -3.25f;
 #endif
 
 		moveInfluence = SimulationRate * Time.deltaTime * Acceleration * 0.1f * MoveScale * MoveScaleMultiplier;

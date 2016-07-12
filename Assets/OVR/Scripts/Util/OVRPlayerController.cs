@@ -223,18 +223,20 @@ public class OVRPlayerController : MonoBehaviour
 
 		bool dpad_move = false;
 
-		if (OVRInput.Get(OVRInput.Button.DpadUp))
-		{
-			moveForward = true;
-			dpad_move   = true;
+		#if UNITY_ANDROID && !UNITY_EDITOR
+			if (OVRInput.Get(OVRInput.Button.DpadUp))
+			{
+				moveForward = true;
+				dpad_move   = true;
 
-		}
+			}
 
-		if (OVRInput.Get(OVRInput.Button.DpadDown))
-		{
-			moveBack  = true;
-			dpad_move = true;
-		}
+			if (OVRInput.Get(OVRInput.Button.DpadDown))
+			{
+				moveBack  = true;
+				dpad_move = true;
+			}
+		#endif
 
 		MoveScale = 1.0f;
 
@@ -271,19 +273,23 @@ public class OVRPlayerController : MonoBehaviour
 
 		Vector3 euler = transform.rotation.eulerAngles;
 
-		bool curHatLeft = OVRInput.Get(OVRInput.Button.PrimaryShoulder);
+		#if UNITY_ANDROID && !UNITY_EDITOR
+			bool curHatLeft = OVRInput.Get(OVRInput.Button.PrimaryShoulder);
 
-		if (curHatLeft && !prevHatLeft)
-			euler.y -= RotationRatchet;
+			if (curHatLeft && !prevHatLeft)
+				euler.y -= RotationRatchet;
 
-		prevHatLeft = curHatLeft;
+			prevHatLeft = curHatLeft;
+		#endif
 
-		bool curHatRight = OVRInput.Get(OVRInput.Button.SecondaryShoulder);
+		#if UNITY_ANDROID && !UNITY_EDITOR
+			bool curHatRight = OVRInput.Get(OVRInput.Button.SecondaryShoulder);
 
-		if(curHatRight && !prevHatRight)
-			euler.y += RotationRatchet;
+			if(curHatRight && !prevHatRight)
+				euler.y += RotationRatchet;
 
-		prevHatRight = curHatRight;
+			prevHatRight = curHatRight;
+		#endif
 
 		//Use keys to ratchet rotation
 		if (Input.GetKeyDown(KeyCode.Q))
@@ -305,23 +311,25 @@ public class OVRPlayerController : MonoBehaviour
 		moveInfluence *= 1.0f + OVRInput.Get(OVRInput.Axis1D.PrimaryIndexTrigger);
 #endif
 
-		Vector2 primaryAxis = OVRInput.Get(OVRInput.Axis2D.PrimaryThumbstick);
+		#if UNITY_ANDROID && !UNITY_EDITOR
+			Vector2 primaryAxis = OVRInput.Get(OVRInput.Axis2D.PrimaryThumbstick);
 
-		if(primaryAxis.y > 0.0f)
-            MoveThrottle += ort * (primaryAxis.y * transform.lossyScale.z * moveInfluence * Vector3.forward);
+			if(primaryAxis.y > 0.0f)
+	            MoveThrottle += ort * (primaryAxis.y * transform.lossyScale.z * moveInfluence * Vector3.forward);
 
-		if(primaryAxis.y < 0.0f)
-            MoveThrottle += ort * (Mathf.Abs(primaryAxis.y) * transform.lossyScale.z * moveInfluence * BackAndSideDampen * Vector3.back);
+			if(primaryAxis.y < 0.0f)
+	            MoveThrottle += ort * (Mathf.Abs(primaryAxis.y) * transform.lossyScale.z * moveInfluence * BackAndSideDampen * Vector3.back);
 
-		if(primaryAxis.x < 0.0f)
-            MoveThrottle += ort * (Mathf.Abs(primaryAxis.x) * transform.lossyScale.x * moveInfluence * BackAndSideDampen * Vector3.left);
+			if(primaryAxis.x < 0.0f)
+	            MoveThrottle += ort * (Mathf.Abs(primaryAxis.x) * transform.lossyScale.x * moveInfluence * BackAndSideDampen * Vector3.left);
 
-		if(primaryAxis.x > 0.0f)
-            MoveThrottle += ort * (primaryAxis.x * transform.lossyScale.x * moveInfluence * BackAndSideDampen * Vector3.right);
+			if(primaryAxis.x > 0.0f)
+	            MoveThrottle += ort * (primaryAxis.x * transform.lossyScale.x * moveInfluence * BackAndSideDampen * Vector3.right);
 
-		Vector2 secondaryAxis = OVRInput.Get(OVRInput.Axis2D.SecondaryThumbstick);
+			Vector2 secondaryAxis = OVRInput.Get(OVRInput.Axis2D.SecondaryThumbstick);
 
-		euler.y += secondaryAxis.x * rotateInfluence;
+			euler.y += secondaryAxis.x * rotateInfluence;
+		#endif
 
 		transform.rotation = Quaternion.Euler(euler);
 	}

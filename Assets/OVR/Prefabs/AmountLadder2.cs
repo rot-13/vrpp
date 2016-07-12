@@ -6,7 +6,9 @@ public class AmountLadder2 : MonoBehaviour {
 	public Transform spine;
 	public Transform slide;
 
-	private float CAMERA_HEIGHT = 1.7f;
+//	private boolean spawned;
+
+	private float SCALE = 1.5f;
 	private float DISTANCE_M = 4f;
 	private float ANGLE_RAD = 3f * (Mathf.PI / 180f);
 	private int NUM_SPINES = 20;
@@ -23,10 +25,9 @@ public class AmountLadder2 : MonoBehaviour {
 		}
 	}
 
+	// TODO animate
 	void SpawnLadder() {
-		//transform.position.Set (transform.position.x, CAMERA_HEIGHT, transform.position.z); // I don't know
 		float firstAngle = -(1.5f + 8f*3f) * (Mathf.PI / 180f);
-//		float firstAngle = 0;
 
 		for (int i = 0; i < NUM_SPINES; i++) {
 			Vector3 forward = transform.forward;
@@ -37,8 +38,6 @@ public class AmountLadder2 : MonoBehaviour {
 			forward.y = Mathf.Sin (firstAngle + i * ANGLE_RAD);
 			forward.Normalize ();
 
-			//forward.y += (i * Mathf.Sin (ANGLE_RAD)); // Increase Y coordinate for new direction
-			//forward.Normalize();
 			Vector3 position = forward * DISTANCE_M + transform.position;
 			Instantiate (spine, position, Quaternion.LookRotation(position - transform.position));
 
@@ -46,8 +45,10 @@ public class AmountLadder2 : MonoBehaviour {
 				Instantiate(slide, position, Quaternion.LookRotation(position - transform.position));
 			}
 		}
+	}
 
-
+	void removeLadder() {
+		// TODO
 	}
 
 }

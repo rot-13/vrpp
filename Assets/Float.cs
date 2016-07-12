@@ -16,7 +16,7 @@ public class Float : NetworkBehaviour {
 	}
 	void Update ()
 	{   
-		if (!isLocalPlayer) {
+		if (isLocalPlayer) {
 			return;
 		}
 		tempVal = transform.parent.transform.position.y;

@@ -28,7 +28,7 @@ public class Float : NetworkBehaviour {
 			return;
 		}
 		if (!Network.isClient) {
-			paypal.transform.LookAt (Camera.main.transform);
+			paypal.transform.LookAt (Camera.main.transform, Vector3.up);
 		}
 		tempVal = transform.parent.transform.position.y;
 		tempPos = transform.position;

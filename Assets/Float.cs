@@ -12,9 +12,15 @@ public class Float : MonoBehaviour {
 	}
 	void Update ()
 	{   
-		tempPos.x = transform.position.x;
-		tempPos.z = transform.position.z;
+		tempVal = transform.parent.transform.position.y;
+		tempPos = transform.position;
 		tempPos.y = tempVal + amplitude * Mathf.Sin (speed * Time.time);
 		transform.position = tempPos;
+	}
+
+	void LateUpdate() {
+		var rotTemp = transform.rotation;
+		rotTemp.x = rotTemp.z = 0;
+		transform.rotation = rotTemp;
 	}
 }

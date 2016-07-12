@@ -16,14 +16,10 @@ public class AddGlow : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-		if (Input.GetButtonDown ("Jump")) {
-			if (renderer.sharedMaterial.shader == shader1)
-				renderer.sharedMaterial.shader = shader2;
-			else
-				renderer.sharedMaterial.shader = shader1;
+		if (true) {
+			renderer.sharedMaterial.shader = shader2;
+		} else {
+			renderer.sharedMaterial.shader = shader1;
 		}
-	}
-
-	void Glow () {
 	}
 }

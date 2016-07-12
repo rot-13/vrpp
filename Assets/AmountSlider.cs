@@ -13,11 +13,15 @@ public class AmountSlider : MonoBehaviour {
 	private float FIRST_ANGLE = -(1.5f + 4f*3f) * (Mathf.PI / 180f);
 
     private ArrayList existingLadder;
+    private GameObject existingSlider;
 
 	private Vector3 spawnedPosition;
 	private Vector3 spawnedForward;
 	private float targetAngle;
 	private float currentAngle;
+
+    private bool animating;
+    private float animationTimer;
 
 	private class SliderData {
 		public Vector3 position;
@@ -30,19 +34,33 @@ public class AmountSlider : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-	
+        animating = false;
 	}
 	
 	// Update is called once per frame
-	void Update () {
+	void Update ()
+    { 
 		if (Input.GetKeyDown(KeyCode.B)) {
 			SpawnLadder ();
 		}
 
-        if (existingLadder != null)
+        if (existingLadder != null && !animating)
         {
 			SlideByLook ();
-//			UpdateAngle ();
+			UpdateAngle ();
+        }
+
+        if (animating)
+        {
+            animate(Mathf.Min(animationTimer / 2f, 1));
+            if (animationTimer > 2f)
+            {
+                animating = false;
+            }
+            else
+            {
+                animationTimer += Time.deltaTime;
+            }
         }
 	}
 
@@ -58,16 +76,21 @@ public class AmountSlider : MonoBehaviour {
 
         existingLadder = new ArrayList();
 
+        float bottomAngle = -Mathf.PI / 2f;
+
 		for (int i = 0; i < NUM_SPINES; i++) {
-			SliderData sliderData = GetSliderData (FIRST_ANGLE + i * ANGLE_RAD);
-			Object spinePart = Instantiate (spine, sliderData.position, sliderData.rotation * Quaternion.Euler(90, 0, 0));
+            //SliderData sliderData = GetSliderData (FIRST_ANGLE + i * ANGLE_RAD);
+            SliderData sliderData = GetSliderData(bottomAngle);
+            GameObject spinePart = (GameObject) Instantiate (spine, sliderData.position, sliderData.rotation * Quaternion.Euler(90, 0, 0));
 			existingLadder.Add(spinePart);
 
 			if (i == 0) {
-				Object slidePart = Instantiate(slide, sliderData.position, sliderData.rotation * Quaternion.Euler(90, 0, 0));
-				existingLadder.Add(slidePart);
+                existingSlider = (GameObject) Instantiate(slide, sliderData.position, sliderData.rotation * Quaternion.Euler(90, 0, 0));
 			}
 		}
+
+        animating = true;
+        animationTimer = 0f;
 	}
 
 	void UpdateAngle() {
@@ -75,44 +98,27 @@ public class AmountSlider : MonoBehaviour {
 		if (Mathf.Abs (targetAngle - currentAngle) < epsilon) {
 			currentAngle = targetAngle;
 		} else {
-			currentAngle += (targetAngle - currentAngle) * 0.1f;
+			currentAngle += (targetAngle - currentAngle) * 0.05f;
 		}
 		SliderData sliderData = GetSliderData (currentAngle);
-		GameObject s = GameObject.Find ("slider(Clone)");
-		s.transform.position = sliderData.position;
-		s.transform.rotation = sliderData.rotation;
+		existingSlider.transform.position = sliderData.position;
+        existingSlider.transform.rotation = sliderData.rotation * Quaternion.Euler(90, 0, 0);
 	}
 
 	void SlideByLook() {
 		var ray = Camera.main.ScreenPointToRay (Input.mousePosition);
 		Transform cam = Camera.main.transform;
 		RaycastHit hit = new RaycastHit ();
-		GameObject s = GameObject.Find ("slider(Clone)");
 		if (Physics.Raycast (cam.position, cam.forward, out hit, 10)) {
 			if (hit.transform.name.StartsWith("spine")) {
-				s.transform.position = new Vector3(hit.transform.position.x, hit.transform.position.y, hit.transform.position.z);
-				s.transform.rotation = hit.transform.rotation;
-//				targetAngle = GetSliderAngleForSpine (hit.transform);
-
-
+                var idx = existingLadder.IndexOf(hit.transform.gameObject);
+                if (idx >= 0)
+                {
+                    targetAngle = FIRST_ANGLE + idx * ANGLE_RAD;
+                }
 			}
 		}
 	}
-
-	float GetSliderAngleForSpine(Transform hitTransform) {
-		Vector3 v = hitTransform.position - spawnedPosition;
-		v.Normalize ();
-
-		Vector3 forward = spawnedForward;
-		forward.y = 0;
-		forward.Normalize ();
-
-		float angle = Mathf.Acos (Vector3.Dot (forward, v));
-
-		print ("Dot = " + Vector3.Dot (forward, v));
-		return angle;
-	}
-
 
 	SliderData GetSliderData(float angle) {
 		Vector3 forward = spawnedForward;
@@ -133,7 +139,6 @@ public class AmountSlider : MonoBehaviour {
 
 
 	void removeLadder() {
-		// TODO animate
         if (existingLadder != null)
         {
             foreach(Object t in existingLadder)
@@ -142,6 +147,51 @@ public class AmountSlider : MonoBehaviour {
             }
             existingLadder = null;
         }
+
+        if (existingSlider != null)
+        {
+            Destroy(existingSlider);
+            existingSlider = null;
+        }
 	}
+
+    void animate(float t)
+    {
+        if (existingLadder == null)
+        {
+            return;
+        }
+
+        float bottomAngle = -Mathf.PI / 2f;
+        float animationDuration = 0.3f;
+
+        for (int i = 0; i < NUM_SPINES; ++i)
+        {
+            GameObject spine = (GameObject) existingLadder[i];
+            float startT = (NUM_SPINES - i - 1) * ((1f - animationDuration) / NUM_SPINES);
+            float spineT = partition(t, startT, startT + animationDuration);
+            float angle = lerp(spineT, bottomAngle, FIRST_ANGLE + i * ANGLE_RAD);
+            SliderData sd = GetSliderData(angle);
+            spine.transform.position = sd.position;
+            spine.transform.rotation = sd.rotation * Quaternion.Euler(90, 0, 0);
+
+            if (i == 0)
+            {
+                existingSlider.transform.position = sd.position;
+                existingSlider.transform.rotation = sd.rotation * Quaternion.Euler(90, 0, 0);
+            }
+        }
+    }
+
+    float partition(float t, float startT, float endT)
+    {
+        t = Mathf.Max(startT, Mathf.Min(t, endT));
+        return (t - startT) / (endT - startT);
+    }
+
+    float lerp(float t, float min, float max)
+    {
+        return (1f - t) * min + t * max;
+    }
 
 }

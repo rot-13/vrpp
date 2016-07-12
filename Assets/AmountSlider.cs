@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class AmountLadder2 : MonoBehaviour {
+public class AmountSlider : MonoBehaviour {
 
 	public GameObject spine;
 	public GameObject slide;

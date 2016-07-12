@@ -6,7 +6,7 @@ public class AmountLadder2 : MonoBehaviour {
 	public Transform spine;
 	public Transform slide;
 
-//	private boolean spawned;
+	private bool spawned;
 
 	private float SCALE = 1.5f;
 	private float DISTANCE_M = 4f;
@@ -21,7 +21,11 @@ public class AmountLadder2 : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 		if (Input.GetKeyDown(KeyCode.B)) {
+			spawned = true;
 			SpawnLadder ();
+		}
+		if (spawned) {
+			SlideByLook ();
 		}
 	}
 
@@ -47,8 +51,25 @@ public class AmountLadder2 : MonoBehaviour {
 		}
 	}
 
+	void SlideByLook() {
+		var ray = Camera.main.ScreenPointToRay (Input.mousePosition);
+		Transform cam = Camera.main.transform;
+		RaycastHit hit = new RaycastHit ();
+		GameObject s = GameObject.Find ("slider(Clone)");
+		if (Physics.Raycast (cam.position, cam.forward, out hit, 10)) {
+			if (hit.transform.name.StartsWith("spine")) {
+				Debug.DrawLine (ray.origin, hit.point);
+				print ("Name=" + hit.transform.name + " childCount=" + hit.transform.childCount);
+				s.transform.position = new Vector3(hit.transform.position.x, hit.transform.position.y, hit.transform.position.z);
+				s.transform.rotation = hit.transform.rotation;
+			}
+
+		}
+	}
+
 	void removeLadder() {
 		// TODO
+		spawned = false;
 	}
 
 }

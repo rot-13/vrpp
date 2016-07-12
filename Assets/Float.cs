@@ -9,11 +9,13 @@ public class Float : NetworkBehaviour {
 	public GameObject mesher;
 	private float tempVal;
 	private Vector3 tempPos;
+	public GameObject paypal;
 
 	void Start () 
 	{
 		if (Network.isClient) {
 			mesher.GetComponent<Renderer>().sharedMaterial = tempMat;
+			paypal.GetComponent<Renderer>().enabled = false;
 		}
 		if (!isLocalPlayer) {
 			return;
@@ -24,6 +26,9 @@ public class Float : NetworkBehaviour {
 	{   
 		if (isLocalPlayer) {
 			return;
+		}
+		if (!Network.isClient) {
+			paypal.transform.LookAt (Camera.main.transform);
 		}
 		tempVal = transform.parent.transform.position.y;
 		tempPos = transform.position;

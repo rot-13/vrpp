@@ -1,18 +1,20 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
 using System.Collections;
 
 public class AmountSlider : MonoBehaviour {
 
 	public GameObject spine;
-	public GameObject slide;
+	public GameObject slider;
+	public Canvas amountCanvas;
 
-	private float SCALE = 1.5f;
 	private float DISTANCE_M = 4f;
 	private float ANGLE_RAD = 3f * (Mathf.PI / 180f);
 	private int NUM_SPINES = 20;
 	private float FIRST_ANGLE = -(1.5f + 4f*3f) * (Mathf.PI / 180f);
 
     private ArrayList existingLadder;
+	private ArrayList existingLadderTexts;
 
 	private Vector3 spawnedPosition;
 	private Vector3 spawnedForward;
@@ -57,14 +59,33 @@ public class AmountSlider : MonoBehaviour {
 		spawnedForward = transform.forward;
 
         existingLadder = new ArrayList();
+		existingLadderTexts = new ArrayList ();
 
 		for (int i = 0; i < NUM_SPINES; i++) {
+			float angle = FIRST_ANGLE + i * ANGLE_RAD;
 			SliderData sliderData = GetSliderData (FIRST_ANGLE + i * ANGLE_RAD);
 			Object spinePart = Instantiate (spine, sliderData.position, sliderData.rotation * Quaternion.Euler(90, 0, 0));
 			existingLadder.Add(spinePart);
 
+
+			Vector3 forward = transform.forward;
+			forward.y = 0;
+			forward.Normalize ();
+			forward = Quaternion.Euler(0, 20, 0) * forward;
+			forward *= Mathf.Cos (angle);
+			forward.y = Mathf.Sin (angle);
+			forward.Normalize ();
+			Vector3 canvasPosition = forward * (DISTANCE_M - 0.1f) + spawnedPosition;
+			Quaternion rotation = Quaternion.LookRotation (canvasPosition - spawnedPosition);
+
+			Object canvas = Instantiate (amountCanvas, canvasPosition, rotation);
+			Text amountText = ((Canvas)canvas).GetComponentInChildren<Text> ();
+			amountText.text = "$" + (i+1)*5;
+			existingLadderTexts.Add (canvas);
+
+
 			if (i == 0) {
-				Object slidePart = Instantiate(slide, sliderData.position, sliderData.rotation * Quaternion.Euler(90, 0, 0));
+				Object slidePart = Instantiate(slider, sliderData.position, sliderData.rotation * Quaternion.Euler(90, 0, 0));
 				existingLadder.Add(slidePart);
 			}
 		}
@@ -84,7 +105,6 @@ public class AmountSlider : MonoBehaviour {
 	}
 
 	void SlideByLook() {
-		var ray = Camera.main.ScreenPointToRay (Input.mousePosition);
 		Transform cam = Camera.main.transform;
 		RaycastHit hit = new RaycastHit ();
 		GameObject s = GameObject.Find ("slider(Clone)");
@@ -140,7 +160,11 @@ public class AmountSlider : MonoBehaviour {
             {
                 Destroy(t);
             }
+			foreach (Object t in existingLadderTexts) {
+				Destroy (t);
+			}
             existingLadder = null;
+			existingLadderTexts = null;
         }
 	}
 

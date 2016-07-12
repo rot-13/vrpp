@@ -20,13 +20,14 @@ limitations under the License.
 ************************************************************************************/
 
 using UnityEngine;
+using UnityEngine.Networking;
 using System.Collections.Generic;
 
 /// <summary>
 /// Controls the player's movement in virtual reality.
 /// </summary>
 [RequireComponent(typeof(CharacterController))]
-public class OVRPlayerController : MonoBehaviour
+public class OVRPlayerController : NetworkBehaviour
 {
 	/// <summary>
 	/// The rate acceleration during movement.
@@ -93,9 +94,14 @@ public class OVRPlayerController : MonoBehaviour
 	private bool prevHatLeft = false;
 	private bool prevHatRight = false;
 	private float SimulationRate = 60f;
+	public Camera blaCamera;
 
 	void Start()
 	{
+		if (!isLocalPlayer) {
+			blaCamera.enabled = false;
+			return;
+		}
 		// Add eye-depth as a camera offset from the player controller
 		var p = CameraRig.transform.localPosition;
 		p.z = OVRManager.profile.eyeDepth;
@@ -145,6 +151,9 @@ public class OVRPlayerController : MonoBehaviour
 
 	protected virtual void Update()
 	{
+		if (!isLocalPlayer) {
+			return;
+		}
 		if (useProfileData)
 		{
 			if (InitialPose == null)

@@ -1,7 +1,8 @@
 ﻿using UnityEngine;
+using UnityEngine.Networking;
 using System.Collections;
 
-public class CharacterControl : MonoBehaviour {
+public class CharacterControl : NetworkBehaviour {
 	public Transform cameraPivot;
 	public CharacterController character;
 	private Vector3 initialPosition;
@@ -14,6 +15,10 @@ public class CharacterControl : MonoBehaviour {
 
 	void Update ()
 	{
+        if (!isLocalPlayer)
+        {
+            return;
+        }
 		if (Mathf.Abs (Input.GetAxis ("Horizontal")) < 0.1f)
 			currentRotation = rotationSpeed.x;
 		else

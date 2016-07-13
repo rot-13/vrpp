@@ -261,7 +261,7 @@ public class AmountSlider : MonoBehaviour {
 		}
 
 		float timeDiff = startedLookingAtAmountTime;
-		float maxTimeSecs = 3f;
+		float maxTimeSecs = 1.5f;
 		if (timeDiff >= maxTimeSecs) {
 			// TODO that's it, we've selected the amount
 			print ("Chose amount!");

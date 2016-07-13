@@ -21,6 +21,8 @@ public class AmountSlider : MonoBehaviour {
 	private Vector3 spawnedForward;
 	private float targetAngle;
 	private float currentAngle;
+	private int chosenIdx;
+	private float startedLookingAtAmountTime;
 
     private bool animating;
     private float animationTimer;
@@ -71,6 +73,8 @@ public class AmountSlider : MonoBehaviour {
         {
             removeLadder();
         }
+		startedLookingAtAmountTime = -1;
+		chosenIdx = -1;
 		targetAngle = FIRST_ANGLE;
 		currentAngle = FIRST_ANGLE;
 		spawnedPosition = transform.position;
@@ -86,7 +90,6 @@ public class AmountSlider : MonoBehaviour {
             SliderData sliderData = GetSliderData(bottomAngle, DISTANCE_M);
             GameObject spinePart = (GameObject) Instantiate (spine, sliderData.position, sliderData.rotation * Quaternion.Euler(90, 0, 0));
 			existingLadder.Add(spinePart);
-
 
 			Vector3 forward = transform.forward;
 			forward.y = 0;
@@ -117,26 +120,53 @@ public class AmountSlider : MonoBehaviour {
 		float epsilon = 1f * (Mathf.PI / 180f);
 		if (Mathf.Abs (targetAngle - currentAngle) < epsilon) {
 			currentAngle = targetAngle;
+			startedLookingAtAmountTime = Time.time;
+			print ("Starting to count the time for ID " + chosenIdx);
+
 		} else {
 			currentAngle += (targetAngle - currentAngle) * 0.05f;
 		}
+
 		SliderData sliderData = GetSliderData (currentAngle, DISTANCE_M);
 		existingSlider.transform.position = sliderData.position;
         existingSlider.transform.rotation = sliderData.rotation * Quaternion.Euler(90, 0, 0);
 	}
 
+	void UpdateSliderColors() {
+		for (int i = 0; i < NUM_SPINES; i++) {
+			Material mat = ((GameObject)existingLadder [i]).transform.GetComponent<Renderer> ().material;
+			if (i == chosenIdx || mat.color != Color.white) {
+				continue;
+			}
+			mat.color = Color.white;
+		}
+		
+		animateGlow ();
+	}
+
 	void SlideByLook() {
+		
 		Transform cam = Camera.main.transform;
 		RaycastHit hit = new RaycastHit ();
 		if (Physics.Raycast (cam.position, cam.forward, out hit, 10)) {
-			if (hit.transform.name.StartsWith("spine")) {
-                var idx = existingLadder.IndexOf(hit.transform.gameObject);
-                if (idx >= 0)
-                {
-                    targetAngle = FIRST_ANGLE + idx * ANGLE_RAD;
-                }
+			if (hit.transform.name.StartsWith ("spine")) {
+				var idx = existingLadder.IndexOf (hit.transform.gameObject);
+				if (idx != chosenIdx) {
+					print ("Chosen id: " + idx);
+					chosenIdx = idx;
+					//startedLookingAtAmountTime = Time.time;
+				}
+
+				if (idx >= 0) {
+					targetAngle = FIRST_ANGLE + idx * ANGLE_RAD;
+				}
 			}
+		} else {
+			chosenIdx = -1;
+			startedLookingAtAmountTime = -1;
 		}
+
+		UpdateSliderColors ();
 	}
 
 	SliderData GetSliderData(float angle, float distance) {
@@ -176,6 +206,31 @@ public class AmountSlider : MonoBehaviour {
             Destroy(existingSlider);
             existingSlider = null;
         }
+	}
+
+	void animateGlow() {
+		if (chosenIdx == -1) {
+			return;
+		}
+
+		float timeDiff = Time.time - startedLookingAtAmountTime;
+		int maxTimeSecs = 3;
+		if (timeDiff >= maxTimeSecs) {
+			// TODO that's it, we've selected the amount
+			print ("Chose amount!");
+		} else {
+			//		float emission = Mathf.PingPong (Time.time, 1.0f);
+			float emission = Mathf.PingPong (startedLookingAtAmountTime / maxTimeSecs, 1.0f);
+
+			Color baseColor = Color.yellow;
+//			Color finalColor = baseColor * Mathf.LinearToGammaSpace (emission);
+			Color finalColor = Color.Lerp(Color.white, Color.yellow, emission);
+
+//			print ("Emission: " + emission + " finalColor: " + finalColor);
+//			((GameObject)existingLadder [chosenIdx]).transform.GetComponent<Renderer> ().material.SetColor ("_EmissionColor", finalColor);
+			((GameObject)existingLadder [chosenIdx]).transform.GetComponent<Renderer> ().material.color = finalColor;
+		}
+
 	}
 
     void animate(float t)

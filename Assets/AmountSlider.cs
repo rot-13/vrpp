@@ -1,18 +1,20 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
 using System.Collections;
 
 public class AmountSlider : MonoBehaviour {
 
 	public GameObject spine;
-	public GameObject slide;
+	public GameObject slider;
+	public Canvas amountCanvas;
 
-	private float SCALE = 1.5f;
 	private float DISTANCE_M = 4f;
 	private float ANGLE_RAD = 3f * (Mathf.PI / 180f);
 	private int NUM_SPINES = 20;
 	private float FIRST_ANGLE = -(1.5f + 4f*3f) * (Mathf.PI / 180f);
 
     private ArrayList existingLadder;
+	private ArrayList existingLadderTexts;
     private GameObject existingSlider;
     private ArrayList previousLadder;
     private ArrayList previousLadderPos;
@@ -83,7 +85,7 @@ public class AmountSlider : MonoBehaviour {
         }
 	}
 
-	void SpawnLadder() {
+	public void SpawnLadder() {
         if (existingLadder != null)
         {
             removeLadder();
@@ -94,17 +96,35 @@ public class AmountSlider : MonoBehaviour {
 		spawnedForward = transform.forward;
 
         existingLadder = new ArrayList();
+		existingLadderTexts = new ArrayList ();
 
         float bottomAngle = -Mathf.PI / 2f;
 
 		for (int i = 0; i < NUM_SPINES; i++) {
             //SliderData sliderData = GetSliderData (FIRST_ANGLE + i * ANGLE_RAD);
-            SliderData sliderData = GetSliderData(bottomAngle);
+            SliderData sliderData = GetSliderData(bottomAngle, DISTANCE_M);
             GameObject spinePart = (GameObject) Instantiate (spine, sliderData.position, sliderData.rotation * Quaternion.Euler(90, 0, 0));
 			existingLadder.Add(spinePart);
 
+
+			Vector3 forward = transform.forward;
+			forward.y = 0;
+			forward.Normalize ();
+			forward = Quaternion.Euler(0, 20, 0) * forward;
+			forward *= Mathf.Cos (bottomAngle);
+			forward.y = Mathf.Sin (bottomAngle);
+			forward.Normalize ();
+			Vector3 canvasPosition = forward * (DISTANCE_M - 0.1f) + spawnedPosition;
+			Quaternion rotation = Quaternion.LookRotation (canvasPosition - spawnedPosition);
+
+			Object canvas = Instantiate (amountCanvas, canvasPosition, rotation);
+			Text amountText = ((Canvas)canvas).GetComponentInChildren<Text> ();
+			amountText.text = "$" + (i+1)*5;
+			existingLadderTexts.Add (canvas);
+
+
 			if (i == 0) {
-                existingSlider = (GameObject) Instantiate(slide, sliderData.position, sliderData.rotation * Quaternion.Euler(90, 0, 0));
+                existingSlider = (GameObject) Instantiate(slider, sliderData.position, sliderData.rotation * Quaternion.Euler(90, 0, 0));
 			}
 		}
 
@@ -119,13 +139,12 @@ public class AmountSlider : MonoBehaviour {
 		} else {
 			currentAngle += (targetAngle - currentAngle) * 0.05f;
 		}
-		SliderData sliderData = GetSliderData (currentAngle);
+		SliderData sliderData = GetSliderData (currentAngle, DISTANCE_M);
 		existingSlider.transform.position = sliderData.position;
         existingSlider.transform.rotation = sliderData.rotation * Quaternion.Euler(90, 0, 0);
 	}
 
 	void SlideByLook() {
-		var ray = Camera.main.ScreenPointToRay (Input.mousePosition);
 		Transform cam = Camera.main.transform;
 		RaycastHit hit = new RaycastHit ();
 		if (Physics.Raycast (cam.position, cam.forward, out hit, 10)) {
@@ -139,7 +158,7 @@ public class AmountSlider : MonoBehaviour {
 		}
 	}
 
-	SliderData GetSliderData(float angle) {
+	SliderData GetSliderData(float angle, float distance) {
 		Vector3 forward = spawnedForward;
 		forward.y = 0;
 		forward.Normalize ();
@@ -150,7 +169,7 @@ public class AmountSlider : MonoBehaviour {
 		forward.y = Mathf.Sin (angle);
 		forward.Normalize ();
 
-		Vector3 position = forward * DISTANCE_M + spawnedPosition;
+		Vector3 position = forward * distance + spawnedPosition;
 		Quaternion rotation = Quaternion.LookRotation (position - spawnedPosition);
 
 		return new SliderData (position, rotation);
@@ -174,7 +193,11 @@ public class AmountSlider : MonoBehaviour {
             {
                 previousLadderPos.Add(((GameObject)previousLadder[i]).transform.position);
             }
+			foreach (Object t in existingLadderTexts) {
+				Destroy (t);
+			}
             existingLadder = null;
+			existingLadderTexts = null;
         }
 
         if (existingSlider != null)
@@ -200,9 +223,15 @@ public class AmountSlider : MonoBehaviour {
             float startT = (NUM_SPINES - i - 1) * ((1f - animationDuration) / NUM_SPINES);
             float spineT = partition(t, startT, startT + animationDuration);
             float angle = lerp(spineT, bottomAngle, FIRST_ANGLE + i * ANGLE_RAD);
-            SliderData sd = GetSliderData(angle);
+            SliderData sd = GetSliderData(angle, DISTANCE_M);
             spine.transform.position = sd.position;
             spine.transform.rotation = sd.rotation * Quaternion.Euler(90, 0, 0);
+
+			Canvas canvas = (Canvas) existingLadderTexts [i];
+			SliderData canvasSd = GetSliderData (angle, DISTANCE_M - 0.1f);
+			canvas.transform.position = canvasSd.position;
+			canvas.transform.rotation = canvasSd.rotation;
+
 
             if (i == 0)
             {

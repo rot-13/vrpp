@@ -16,6 +16,8 @@ public class AmountSlider : MonoBehaviour {
     private ArrayList existingLadder;
 	private ArrayList existingLadderTexts;
     private GameObject existingSlider;
+    private ArrayList previousLadder;
+    private ArrayList previousLadderPos;
 
 	private Vector3 spawnedPosition;
 	private Vector3 spawnedForward;
@@ -24,6 +26,8 @@ public class AmountSlider : MonoBehaviour {
 
     private bool animating;
     private float animationTimer;
+
+    private float removalTimer;
 
 	private class SliderData {
 		public Vector3 position;
@@ -54,7 +58,7 @@ public class AmountSlider : MonoBehaviour {
 
         if (animating)
         {
-            animate(Mathf.Min(animationTimer / 2f, 1));
+            animate(Mathf.Min(animationTimer / 2f, 1f));
             if (animationTimer > 2f)
             {
                 animating = false;
@@ -62,6 +66,21 @@ public class AmountSlider : MonoBehaviour {
             else
             {
                 animationTimer += Time.deltaTime;
+            }
+        }
+
+        if (previousLadder != null)
+        {
+            removalTimer += Time.deltaTime;
+            animateRemoval(Mathf.Min(removalTimer / 2f, 1f));
+            if (removalTimer > 2f)
+            {
+                foreach (GameObject t in previousLadder)
+                {
+                    Destroy(t);
+                }
+                previousLadder = null;
+                previousLadderPos = null;
             }
         }
 	}
@@ -160,9 +179,19 @@ public class AmountSlider : MonoBehaviour {
 	void removeLadder() {
         if (existingLadder != null)
         {
-            foreach(Object t in existingLadder)
+            if (previousLadder != null)
             {
-                Destroy(t);
+                foreach (Object t in previousLadder)
+                {
+                    Destroy(t);
+                }
+            }
+            removalTimer = 0f;
+            previousLadder = existingLadder;
+            previousLadderPos = new ArrayList();
+            for (int i = 0; i < NUM_SPINES; ++i)
+            {
+                previousLadderPos.Add(((GameObject)previousLadder[i]).transform.position);
             }
 			foreach (Object t in existingLadderTexts) {
 				Destroy (t);
@@ -221,6 +250,19 @@ public class AmountSlider : MonoBehaviour {
     float lerp(float t, float min, float max)
     {
         return (1f - t) * min + t * max;
+    }
+
+    void animateRemoval(float t)
+    {
+        float animationDuration = 0.3f;
+        for (int i = 0; i < NUM_SPINES; ++i)
+        {
+            GameObject spine = (GameObject)previousLadder[i];
+            float startT = (NUM_SPINES - i - 1) * ((1f - animationDuration) / NUM_SPINES);
+            float spineT = partition(t, startT, startT + animationDuration);
+            float offset = lerp(Mathf.Pow(spineT, 10), 0, 100);
+            spine.transform.position = ((Vector3)previousLadderPos[i]) + new Vector3(0, offset, 0);
+        }
     }
 
 }

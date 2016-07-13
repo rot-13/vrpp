@@ -10,6 +10,7 @@ public class AddGlow : MonoBehaviour {
 	public GameObject paypal;
 	public GameObject paypal1;
 	public GameObject paypal2;
+	public bool showHere = false;
 	public Camera came;
 	public int counter = 0;
 	private bool opened = false;
@@ -23,21 +24,18 @@ public class AddGlow : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-		if (!Network.isClient) {
-			paypal.transform.LookAt (Camera.main.transform, Vector3.up);
-		}
-
 		var ray = came.ScreenPointToRay (Input.mousePosition);
 		Transform cam = came.transform;
 		RaycastHit hit = new RaycastHit ();
-		if (Physics.Raycast (cam.position, cam.forward, out hit, 30) && hit.transform.name.StartsWith ("artik")) {
+		if (showHere && Physics.Raycast (cam.position, cam.forward, out hit, 30) && hit.transform.name.StartsWith ("artik")) {
 			hit.transform.parent.FindChild("innersphere").GetComponent<Renderer>().enabled = true;
+			hit.transform.parent.FindChild("innersphere").transform.LookAt (came.transform, Vector3.up);
 			hit.transform.parent.FindChild("innersphere").FindChild("pay").GetComponent<Renderer>().enabled = true;
 			hit.transform.parent.FindChild("innersphere").FindChild("pal").GetComponent<Renderer>().enabled = true;
 			renderer.sharedMaterial.shader = shader2;
 			counter += 1;
-			if (!opened && counter > 500) {
-				opened = true;
+			if (counter > 250) {
+				counter = 0;
 				transform.parent.FindChild("OVRCameraRig").GetComponent<AmountSlider> ().SpawnLadder();
 			}
 		} else {

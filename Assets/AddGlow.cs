@@ -10,6 +10,9 @@ public class AddGlow : MonoBehaviour {
 	public GameObject paypal;
 	public GameObject paypal1;
 	public GameObject paypal2;
+	public GameObject script;
+	public int counter = 0;
+	private bool opened = false;
 
 	// Use this for initialization
 	void Start () {
@@ -35,7 +38,13 @@ public class AddGlow : MonoBehaviour {
 			paypal1.GetComponent<Renderer>().enabled = true;
 			paypal2.GetComponent<Renderer>().enabled = true;
 			renderer.sharedMaterial.shader = shader2;
+			counter += 1;
+			if (!opened && counter > 500) {
+				opened = true;
+				script.GetComponent<AmountSlider> ().SpawnLadder();
+			}
 		} else {
+			counter = 0;
 			renderer.sharedMaterial.shader = shader1;
 			paypal.GetComponent<Renderer>().enabled = false;
 			paypal1.GetComponent<Renderer>().enabled = false;

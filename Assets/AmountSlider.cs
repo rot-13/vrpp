@@ -66,7 +66,7 @@ public class AmountSlider : MonoBehaviour {
         }
 	}
 
-	void SpawnLadder() {
+	public void SpawnLadder() {
         if (existingLadder != null)
         {
             removeLadder();

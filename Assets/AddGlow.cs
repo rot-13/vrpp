@@ -31,9 +31,9 @@ public class AddGlow : MonoBehaviour {
 		Transform cam = came.transform;
 		RaycastHit hit = new RaycastHit ();
 		if (Physics.Raycast (cam.position, cam.forward, out hit, 30) && hit.transform.name.StartsWith ("artik")) {
-			paypal.GetComponent<Renderer>().enabled = true;
-			paypal1.GetComponent<Renderer>().enabled = true;
-			paypal2.GetComponent<Renderer>().enabled = true;
+			hit.transform.parent.FindChild("innersphere").GetComponent<Renderer>().enabled = true;
+			hit.transform.parent.FindChild("innersphere").FindChild("pay").GetComponent<Renderer>().enabled = true;
+			hit.transform.parent.FindChild("innersphere").FindChild("pal").GetComponent<Renderer>().enabled = true;
 			renderer.sharedMaterial.shader = shader2;
 			counter += 1;
 			if (!opened && counter > 500) {

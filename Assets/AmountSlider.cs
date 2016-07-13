@@ -17,9 +17,11 @@ public class AmountSlider : MonoBehaviour {
 	private ArrayList existingLadderTexts;
     private GameObject existingSlider;
     private ArrayList previousLadder;
+    private ArrayList previousLadderTexts;
     private ArrayList previousLadderPos;
+    private ArrayList previousLadderTextsPos;
 
-	private Vector3 spawnedPosition;
+    private Vector3 spawnedPosition;
 	private Vector3 spawnedForward;
 	private float targetAngle;
 	private float currentAngle;
@@ -79,8 +81,14 @@ public class AmountSlider : MonoBehaviour {
                 {
                     Destroy(t);
                 }
+                foreach (Object t in previousLadderTexts)
+                {
+                    Destroy(t);
+                }
                 previousLadder = null;
                 previousLadderPos = null;
+                previousLadderTexts = null;
+                previousLadderTextsPos = null;
             }
         }
 	}
@@ -101,7 +109,6 @@ public class AmountSlider : MonoBehaviour {
         float bottomAngle = -Mathf.PI / 2f;
 
 		for (int i = 0; i < NUM_SPINES; i++) {
-            //SliderData sliderData = GetSliderData (FIRST_ANGLE + i * ANGLE_RAD);
             SliderData sliderData = GetSliderData(bottomAngle, DISTANCE_M);
             GameObject spinePart = (GameObject) Instantiate (spine, sliderData.position, sliderData.rotation * Quaternion.Euler(90, 0, 0));
 			existingLadder.Add(spinePart);
@@ -185,17 +192,21 @@ public class AmountSlider : MonoBehaviour {
                 {
                     Destroy(t);
                 }
+                foreach (Object t in previousLadderTexts)
+                {
+                    Destroy(t);
+                }
             }
             removalTimer = 0f;
             previousLadder = existingLadder;
             previousLadderPos = new ArrayList();
+            previousLadderTexts = existingLadderTexts;
+            previousLadderTextsPos = new ArrayList();
             for (int i = 0; i < NUM_SPINES; ++i)
             {
                 previousLadderPos.Add(((GameObject)previousLadder[i]).transform.position);
+                previousLadderTextsPos.Add(((Canvas)previousLadderTexts[i]).transform.position);
             }
-			foreach (Object t in existingLadderTexts) {
-				Destroy (t);
-			}
             existingLadder = null;
 			existingLadderTexts = null;
         }
@@ -258,10 +269,12 @@ public class AmountSlider : MonoBehaviour {
         for (int i = 0; i < NUM_SPINES; ++i)
         {
             GameObject spine = (GameObject)previousLadder[i];
+            Canvas text = (Canvas)previousLadderTexts[i];
             float startT = (NUM_SPINES - i - 1) * ((1f - animationDuration) / NUM_SPINES);
             float spineT = partition(t, startT, startT + animationDuration);
             float offset = lerp(Mathf.Pow(spineT, 10), 0, 100);
             spine.transform.position = ((Vector3)previousLadderPos[i]) + new Vector3(0, offset, 0);
+            text.transform.position = ((Vector3)previousLadderTextsPos[i]) + new Vector3(0, offset, 0);
         }
     }
 

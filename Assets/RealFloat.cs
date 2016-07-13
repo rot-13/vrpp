@@ -9,14 +9,14 @@ public class RealFloat : MonoBehaviour {
 
 	void Start () 
 	{
-		tempVal = transform.position.y;
-		tempPos = transform.position;
+//		tempVal = transform.position.y;
+//		tempPos = transform.position;
 	}
 
 	void Update ()
 	{
-		tempVal = transform.parent.transform.position.y + 2;
-		tempPos.y = tempVal + amplitude * Mathf.Sin (speed * Time.time);
-		transform.position = tempPos;
+//		tempVal = transform.parent.transform.position.y + 2;
+//		tempPos.y = tempVal + amplitude * Mathf.Sin (speed * Time.time);
+//		transform.position = tempPos;
 	}
 }

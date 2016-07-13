@@ -34,8 +34,8 @@ public class AddGlow : MonoBehaviour {
 			hit.transform.parent.FindChild("innersphere").FindChild("pal").GetComponent<Renderer>().enabled = true;
 			renderer.sharedMaterial.shader = shader2;
 			counter += 1;
-			if (counter > 250) {
-				counter = 0;
+			if (counter > 100) {
+				counter = -500;
 				transform.parent.FindChild("OVRCameraRig").GetComponent<AmountSlider> ().SpawnLadder();
 			}
 		} else {
